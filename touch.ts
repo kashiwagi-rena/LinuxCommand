@@ -6,8 +6,7 @@ console.log("@@@@@", options);
  * Deno.argsで、文字列が入っていない場合に、エラー文が出る仕様
  */
 if (Deno.args.length === 0) {
-    console.error("使用方法： deno run --allow-write touch.ts <ファイル名>");
-    Deno.exit(1);
+    throw new Error("使用方法： deno run --allow-write touch.ts <ファイル名>");
 }
 /**
  * touchコマンドのオプション"-a"を追加
@@ -72,7 +71,7 @@ if (options === "-t"){
         const path = Deno.args[2];
         await Deno.utime(path, info, info);
     }catch(_e){
-        console.error("使用方法： deno run --allow-write touch.ts -t <時刻> <ファイル名>");
+        throw new Error("使用方法： deno run --allow-write touch.ts -t <時刻> <ファイル名>");
     }
 }
 
@@ -88,7 +87,7 @@ if (options === "-r"){
     
         await Deno.utime(dst, srcInfo.mtime ?? new Date(), srcInfo.atime ?? new Date());
     } catch(_e) {
-        console.error("使用方法： deno run --allow-write touch.ts -r <src> <dst>");
+        throw new Error("使用方法： deno run --allow-write touch.ts -r <src> <dst>");
     }
 }
 
@@ -106,7 +105,7 @@ for (const filename of Deno.args) {
      */
     try{
         await Deno.stat(filename);
-        console.log("ファイルが存在します");
+        throw new Error("ファイルが存在します");
     }catch(_e){
         const file = await Deno.create(filename);
         file.close();
