@@ -1,6 +1,6 @@
 console.log(Deno.args);
 const options = Deno.args[0];
-console.log(Deno.args);
+console.log("@@@@@", options);
 
 /**
  * Deno.argsで、文字列が入っていない場合に、エラー文が出る仕様
@@ -13,17 +13,23 @@ if (Deno.args.length === 0) {
  * touchコマンドのオプション"-a"を追加
  */
 if (options === "-a"){
-    const args1 = Deno.args[0];
+    const args1 = Deno.args[1];
+
     if (args1 === "-t"){
-        const path = Deno.args[1];
+        const { time } = Deno.args[2];
+        const path = Deno.args[3];
         try{
-            const info = await Deno.stat(path);
-            await Deno.utime(path, info.mtime ?? new Date(), new Date());
+            const { mtime } = await Deno.stat(path);
+            await Deno.utime(path, new Date(), Number(time));
         }catch(_e){
             const newFile = await Deno.create(path);
             newFile.close();
         }    
     }
+
+    const { mtime } = await Deno.stat(args1);
+    await Deno.utime(args1, new Date(), mtime ?? new Date());
+
     try{
         const info = await Deno.stat(args1);
         await Deno.utime(args1, new Date(), info.mtime ?? new Date());
@@ -98,7 +104,11 @@ for (const filename of Deno.args) {
     /**
      * 空のファイル作成
      */
-    const file = await Deno.create(filename);
-
-    file.close();
+    try{
+        await Deno.stat(filename);
+        console.log("ファイルが存在します");
+    }catch(_e){
+        const file = await Deno.create(filename);
+        file.close();
+    }
 }
